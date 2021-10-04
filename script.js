@@ -78,6 +78,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class App {
     #map
+    #mapZoomLevel = 10
     #mapEvent
     #workouts = []
 
@@ -85,6 +86,7 @@ class App {
         this._getPosition()
         form.addEventListener('submit', this._newWorkout.bind(this))
         inputType.addEventListener('change', this._toggleElevationField)
+        containerWorkouts.addEventListener('click', this._moveToPopup.bind(this))
     }
 
     _getPosition(){
@@ -103,7 +105,7 @@ class App {
         // Creating a table for coordinates
         const coords = [latitude, longitude]
 
-        this.#map = L.map('map').setView(coords, 10);
+        this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
         console.log(this)
         L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -253,6 +255,20 @@ class App {
             `
         }
         form.insertAdjacentHTML('afterend', node)
+    }
+    _moveToPopup(event) {
+        const workoutElement = event.target.closest('.workout')
+
+        if (!workoutElement) return
+
+        const workout = this.#workouts.find(
+            work => work.id === workoutElement.dataset.id)
+            this.#map.setView(workout.coordinates, this.#mapZoomLevel, {
+                animate: true,
+                pan: {
+                    duration: 1
+                }
+            })
     }
 
 }
